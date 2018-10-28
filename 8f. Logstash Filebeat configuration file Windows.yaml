@@ -1,0 +1,25 @@
+
+input {
+    beats {
+        port => 5047
+        host => "0.0.0.0"
+        type => "win-filezilla"
+        }
+}
+
+filter {
+    if [type] == "win-filezilla" {
+      grok {
+        match => { "message" => "%{PROG}%{SPACE}%{DATE}%{SPACE}%{TIME}%{SPACE}%{WORD}%{SPACE}%{NOTSPACE}%{SPACE}%{GREEDYDATA}" }
+    }
+  }
+}
+
+output {
+  elasticsearch {
+  sniffing => true
+  hosts => ["uk1lv8702:9200", "uk1lv8703:9200", "uk1lv8704:9200"]
+  index => "pci-logs-%{+YYYY.MM}"
+  manage_template => false
+  }
+}

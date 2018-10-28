@@ -1,0 +1,53 @@
+input {
+    beats {
+        port => 5046
+        host => "0.0.0.0"
+    }
+}
+
+filter {
+    grok {
+        match => { "message" => "%{GREEDYDATA:message}" }
+    }
+}
+
+output {
+  elasticsearch {
+    sniffing => true
+    hosts => ["uk1lv8702:9200", "uk1lv8703:9200", "uk1lv8704:9200"]
+    index => "pci-logs-%{+YYYY.MM.dd}"
+    manage_template => false
+  }
+}
+
+# Template for XML
+input {
+    beats {
+        port => 5046
+        host => "0.0.0.0"
+    }
+}
+
+filter {
+    grok {
+        match => { "message" => "%{GREEDYDATA:message}" }
+    }
+    xml {
+        source => "message"
+        store_xml => "false"
+        xpath => [ "xpath-syntax", "destination-field" ]
+        ...
+        xpath => ["/BillingAndCosting/ControlArea/SenderId/text()","senderid"]
+
+    }
+}
+
+output {
+  elasticsearch {
+    sniffing => true
+    hosts => ["uk1lv8702:9200", "uk1lv8703:9200", "uk1lv8704:9200"]
+    index => "pci-logs-%{+YYYY.MM.dd}"
+    manage_template => false
+  }
+}
+
